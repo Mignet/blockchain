@@ -115,7 +115,8 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.v5ent.SparkWeb</mainClass>
+									<!-- <mainClass>com.v5ent.SparkWeb</mainClass> -->
+									<mainClass>com.v5ent.Node</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>

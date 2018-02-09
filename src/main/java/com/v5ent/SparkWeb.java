@@ -3,10 +3,15 @@ package com.v5ent;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +19,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.v5ent.domain.Block;
 import com.v5ent.domain.Message;
-import com.v5ent.utils.SHA256;
 
 import spark.Request;
 import spark.Response;
@@ -22,7 +26,7 @@ import spark.Route;
 
 public class SparkWeb {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SparkWeb.class);
-	private static ArrayList<Block> blockChain = new ArrayList<Block>();
+	private static List<Block> blockChain = new LinkedList<Block>();
 
 	/**
 	 * 计算区块的hash值
@@ -33,7 +37,9 @@ public class SparkWeb {
 	 */
 	public static String calculateHash(Block block) {
 		String record = (block.getIndex()) + block.getTimestamp() + (block.getVac()) + block.getPrevHash();
-		return SHA256.crypt(record);
+		MessageDigest digest = DigestUtils.getSha256Digest();
+		byte[] hash = digest.digest(StringUtils.getBytesUtf8(record));
+		return  Hex.encodeHexString(hash);
 	}
 
 	/**
@@ -78,7 +84,7 @@ public class SparkWeb {
 	 * 
 	 * @param newBlocks
 	 */
-	public void replaceChain(ArrayList<Block> newBlocks) {
+	public void replaceChain(List<Block> newBlocks) {
 		if (newBlocks.size() > blockChain.size()) {
 			blockChain = newBlocks;
 		}
