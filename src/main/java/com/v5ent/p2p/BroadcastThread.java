@@ -36,12 +36,12 @@ public class BroadcastThread extends Thread {
 			PrintWriter pw = null;
 			try {
 				Thread.sleep(30000);
-				LOGGER.info(gson.toJson(blockChain));
 				LOGGER.info("\n------------broadcast-------------\n");
+				LOGGER.info(gson.toJson(blockChain));
 				pw = new PrintWriter(socket.getOutputStream());
 				// 发送到其他结点
-				pw.write(gson.toJson(blockChain));
 				pw.write("------------broadcast-------------\n");
+				pw.write(gson.toJson(blockChain));
 				pw.flush();
 			} catch (InterruptedException e) {
 				LOGGER.error("error:", e);

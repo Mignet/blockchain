@@ -42,6 +42,7 @@
 			<artifactId>commons-codec</artifactId>
 			<version>${commons.codec.version}</version>
 		</dependency>
+		
 		<!-- netty -->
 		<dependency>
 			<groupId>io.netty</groupId>

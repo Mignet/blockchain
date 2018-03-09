@@ -21,6 +21,9 @@ public class Block {
 	/**指向前一个块的 SHA256 散列值*/
 	private String prevHash;
 	
+	private int difficulty;
+	private String nonce;
+	
 	/** getters and setters**/
 	public int getIndex() {
 		return index;
@@ -51,6 +54,18 @@ public class Block {
 	}
 	public void setPrevHash(String prevHash) {
 		this.prevHash = prevHash;
+	}
+	public int getDifficulty() {
+		return difficulty;
+	}
+	public void setDifficulty(int difficulty) {
+		this.difficulty = difficulty;
+	}
+	public String getNonce() {
+		return nonce;
+	}
+	public void setNonce(String nonce) {
+		this.nonce = nonce;
 	}
 	
 }

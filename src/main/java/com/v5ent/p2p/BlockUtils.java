@@ -3,6 +3,7 @@ package com.v5ent.p2p;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;
@@ -10,7 +11,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import com.v5ent.domain.Block;
 
-public class Common {
+public class BlockUtils {
 	/**
 	 * 计算区块的hash值
 	 * 
@@ -22,7 +23,7 @@ public class Common {
 		String record = (block.getIndex()) + block.getTimestamp() + (block.getVac()) + block.getPrevHash();
 		MessageDigest digest = DigestUtils.getSha256Digest();
 		byte[] hash = digest.digest(StringUtils.getBytesUtf8(record));
-		return  Hex.encodeHexString(hash);
+		return Hex.encodeHexString(hash);
 	}
 
 	/**
@@ -61,5 +62,17 @@ public class Common {
 		}
 		return true;
 	}
-	
+
+	/**
+	 * 如果有别的链比你长，就用比你长的链作为区块链
+	 * 
+	 * @param newBlocks
+	 */
+	public List<Block> replaceChain(List<Block> blockChain, List<Block> newBlocks) {
+		if (newBlocks.size() > blockChain.size()) {
+			return newBlocks;
+		} else {
+			return blockChain;
+		}
+	}
 }
