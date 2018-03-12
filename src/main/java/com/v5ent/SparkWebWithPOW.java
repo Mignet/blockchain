@@ -71,14 +71,14 @@ public class SparkWebWithPOW {
 
 		/*
 		 * 这里的 for 循环很重要： 获得 i 的十六进制表示 ，将 Nonce 设置为这个值，并传入 calculateHash 计算哈希值。
-		 * 之后通过上面的 isHashValid 函数判断是否满足难度要求，如果不满足就重复尝试。 这个计算过程会一直持续，直到求得了满足要求的
-		 * Nonce 值，之后通过 handleWriteBlock 函数将新块加入到链上。
+		 * 之后通过上面的 isHashValid 函数判断是否满足难度要求，如果不满足就重复尝试。 这个计算过程会一直持续，
+		 * 直到求得了满足要求的 Nonce 值，之后将新块加入到链上。
 		 */
 		for (int i = 0;; i++) {
 			String hex = String.format("%x", i);
 			newBlock.setNonce(hex);
 			if (!isHashValid(calculateHash(newBlock), newBlock.getDifficulty())) {
-				System.out.printf("%s do more work!\n", calculateHash(newBlock));
+				LOGGER.info("{} need do more work!", calculateHash(newBlock));
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -86,7 +86,7 @@ public class SparkWebWithPOW {
 				}
 				continue;
 			} else {
-				System.out.printf("%s work done!\n", calculateHash(newBlock));
+				LOGGER.info("{} work done!", calculateHash(newBlock));
 				newBlock.setHash(calculateHash(newBlock));
 				break;
 			}
@@ -170,7 +170,7 @@ public class SparkWebWithPOW {
 
 		/***
 		 * post / {"vac":75} 
-		 * curl -X POST -i http://localhost:4567/ --data '{"vac":75}'
+		 * curl -X POST -i http://localhost:4567/ --data {"vac":75}
 		 */
 		post("/", new Route() {
 			@Override
@@ -185,7 +185,7 @@ public class SparkWebWithPOW {
 				Block newBlock = generateBlock(lastBlock, vac);
 				if (isBlockValid(newBlock, lastBlock)) {
 					blockChain.add(newBlock);
-					LOGGER.debug(gson.toJson(blockChain));
+					LOGGER.info(gson.toJson(blockChain));
 				} else {
 					return "HTTP 500: Invalid Block Error";
 				}
