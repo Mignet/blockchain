@@ -10,7 +10,11 @@ import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.v5ent.domain.Block;
-
+/**
+ * 关于链处理的公共方法类
+ * @author Mignet
+ *
+ */
 public class BlockUtils {
 	/**
 	 * 计算区块的hash值
@@ -66,13 +70,15 @@ public class BlockUtils {
 	/**
 	 * 如果有别的链比你长，就用比你长的链作为区块链
 	 * 
+	 * @param oldBlocks
 	 * @param newBlocks
+	 * @return 结果链
 	 */
-	public List<Block> replaceChain(List<Block> blockChain, List<Block> newBlocks) {
-		if (newBlocks.size() > blockChain.size()) {
+	public List<Block> replaceChain(List<Block> oldBlocks,List<Block> newBlocks) {
+		if (newBlocks.size() > oldBlocks.size()) {
 			return newBlocks;
-		} else {
-			return blockChain;
+		}else{
+			return oldBlocks;
 		}
 	}
 }

@@ -29,7 +29,7 @@
 		<log4j.version>1.2.17</log4j.version>
 		<gson.version>2.8.2</gson.version>
 
-		<java.version>1.6</java.version>
+		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
 	</properties>
@@ -117,7 +117,7 @@
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<!-- <mainClass>com.v5ent.SparkWeb</mainClass> -->
-									<mainClass>com.v5ent.Node</mainClass>
+									<mainClass>com.v5ent.p2p.Node</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>

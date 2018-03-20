@@ -20,13 +20,9 @@ import com.google.gson.GsonBuilder;
 import com.v5ent.domain.Block;
 import com.v5ent.domain.Message;
 
-import spark.Request;
-import spark.Response;
-import spark.Route;
-
 public class SparkWeb {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SparkWeb.class);
-	private static List<Block> blockChain = new LinkedList<Block>();
+	private static List<Block> blockChain = new LinkedList<>();
 
 	/**
 	 * 计算区块的hash值
@@ -82,11 +78,15 @@ public class SparkWeb {
 	/**
 	 * 如果有别的链比你长，就用比你长的链作为区块链
 	 * 
+	 * @param oldBlocks
 	 * @param newBlocks
+	 * @return 结果链
 	 */
-	public void replaceChain(List<Block> newBlocks) {
-		if (newBlocks.size() > blockChain.size()) {
-			blockChain = newBlocks;
+	public List<Block> replaceChain(List<Block> oldBlocks,List<Block> newBlocks) {
+		if (newBlocks.size() > oldBlocks.size()) {
+			return newBlocks;
+		}else{
+			return oldBlocks;
 		}
 	}
 
@@ -104,19 +104,12 @@ public class SparkWeb {
 		/**
 		 * get /
 		 */
-		get("/", new Route() {
-			@Override
-			public Object handle(Request request, Response response) throws Exception {
-				return gson.toJson(blockChain);
-			}
-		});
+		get("/", (request, response) -> gson.toJson(blockChain)); 
 
 		/***
 		 * post / {"vac":75}
 		 */
-		post("/", new Route() {
-			@Override
-			public Object handle(Request request, Response response) throws Exception {
+		post("/", (request, response) ->{
 				String body = request.body();
 				Message m = gson.fromJson(body, Message.class);
 				if (m == null) {
@@ -132,7 +125,6 @@ public class SparkWeb {
 					return "HTTP 500: Invalid Block Error";
 				}
 				return "success!";
-			}
 		});
 		
 		LOGGER.info(gson.toJson(blockChain));

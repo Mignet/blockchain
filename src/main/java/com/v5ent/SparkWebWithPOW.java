@@ -20,10 +20,6 @@ import com.google.gson.GsonBuilder;
 import com.v5ent.domain.Block;
 import com.v5ent.domain.Message;
 
-import spark.Request;
-import spark.Response;
-import spark.Route;
-
 /**
  * 工作量证明算法 Proof-of-work
  * 
@@ -35,9 +31,8 @@ import spark.Route;
  */
 public class SparkWebWithPOW {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SparkWebWithPOW.class);
-	private static List<Block> blockChain = new LinkedList<Block>();
-
-	static int difficulty = 1;
+	private static List<Block> blockChain = new LinkedList<>();
+	private static int difficulty = 1;
 
 	/**
 	 * 计算区块的hash值
@@ -83,8 +78,8 @@ public class SparkWebWithPOW {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					LOGGER.error("error:", e);
+					Thread.currentThread().interrupt();
 				}
-				continue;
 			} else {
 				LOGGER.info("{} work done!", calculateHash(newBlock));
 				newBlock.setHash(calculateHash(newBlock));
@@ -137,11 +132,15 @@ public class SparkWebWithPOW {
 	/**
 	 * 如果有别的链比你长，就用比你长的链作为区块链
 	 * 
+	 * @param oldBlocks
 	 * @param newBlocks
+	 * @return 结果链
 	 */
-	public void replaceChain(List<Block> newBlocks) {
-		if (newBlocks.size() > blockChain.size()) {
-			blockChain = newBlocks;
+	public List<Block> replaceChain(List<Block> oldBlocks,List<Block> newBlocks) {
+		if (newBlocks.size() > oldBlocks.size()) {
+			return newBlocks;
+		}else{
+			return oldBlocks;
 		}
 	}
 
@@ -161,20 +160,13 @@ public class SparkWebWithPOW {
 		/**
 		 * get /
 		 */
-		get("/", new Route() {
-			@Override
-			public Object handle(Request request, Response response) throws Exception {
-				return gson.toJson(blockChain);
-			}
-		});
+		get("/", (request, response) ->gson.toJson(blockChain));
 
 		/***
 		 * post / {"vac":75} 
 		 * curl -X POST -i http://localhost:4567/ --data {"vac":75}
 		 */
-		post("/", new Route() {
-			@Override
-			public Object handle(Request request, Response response) throws Exception {
+		post("/", (request, response) ->{
 				String body = request.body();
 				Message m = gson.fromJson(body, Message.class);
 				if (m == null) {
@@ -190,7 +182,6 @@ public class SparkWebWithPOW {
 					return "HTTP 500: Invalid Block Error";
 				}
 				return "success!";
-			}
 		});
 
 		LOGGER.info(gson.toJson(blockChain));
