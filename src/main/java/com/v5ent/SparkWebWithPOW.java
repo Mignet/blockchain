@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.v5ent.domain.Block;
-import com.v5ent.domain.Message;
+import com.v5ent.entity.Block;
+import com.v5ent.entity.Message;
 
 /**
  * 工作量证明算法 Proof-of-work

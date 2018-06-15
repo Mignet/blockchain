@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.v5ent.domain.Block;
+import com.v5ent.entity.Block;
 /**
  * 结点链通讯线程
  * @author Mignet

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[QC] %d{HH:mm:ss.SSS} [%t] %-5level %l | %msg%n"/>
+        </Console>
+        <File name="File" fileName="smart4blockchain.log" append="false">
+            <PatternLayout pattern="[QC] %d{HH:mm:ss.SSS} [%t] %-5level %l | %msg%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <!--<Root level="DEBUG">-->
+        <!--<AppenderRef ref="File"/>-->
+        <!--</Root>-->
+        <Logger name="io.netty" level="ERROR"/>
+        <Logger name="ceng" level="INFO"/>
+    </Loggers>
+</Configuration>

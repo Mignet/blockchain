@@ -24,18 +24,29 @@
 	<properties>
 		<commons.codec.version>1.9</commons.codec.version>
 		<spark.version>2.6.0</spark.version>
-		<netty.version>4.0.18.Final</netty.version>
-		<slf4j.version>1.6.6</slf4j.version>
-		<log4j.version>1.2.17</log4j.version>
+		<slf4j.version>1.7.12</slf4j.version>
+        <log4j.version>2.4.1</log4j.version>
 		<gson.version>2.8.2</gson.version>
-
+		<netty-all.version>4.0.33.Final</netty-all.version>
+		<guava.version>18.0</guava.version>
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
 	</properties>
 
 	<dependencies>
-	
+		<!-- netty for p2p -->
+	  	<dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${netty-all.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        
 		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -43,11 +54,11 @@
 			<version>${commons.codec.version}</version>
 		</dependency>
 		
-		<!-- netty -->
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-io -->
 		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
-			<version>${netty.version}</version>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-io</artifactId>
+		    <version>1.3.2</version>
 		</dependency>
 		
 		<!-- 超小型web框架 -->
@@ -55,6 +66,13 @@
 			<groupId>com.sparkjava</groupId>
 			<artifactId>spark-core</artifactId>
 			<version>${spark.version}</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+		<dependency>
+		    <groupId>org.bouncycastle</groupId>
+		    <artifactId>bcprov-jdk15on</artifactId>
+		    <version>1.59</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
@@ -66,20 +84,28 @@
 
 		<!-- log start -->
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>${log4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
 		<!-- log end -->
 
 	</dependencies>
@@ -117,7 +143,7 @@
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<!-- <mainClass>com.v5ent.SparkWeb</mainClass> -->
-									<mainClass>com.v5ent.p2p.Node</mainClass>
+									<mainClass>com.v5ent.real.p2p.Node</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>
