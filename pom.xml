@@ -69,11 +69,13 @@
 		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+		<!-- 
 		<dependency>
 		    <groupId>org.bouncycastle</groupId>
 		    <artifactId>bcprov-jdk15on</artifactId>
 		    <version>1.59</version>
 		</dependency>
+		 -->
 
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
@@ -82,8 +84,8 @@
 			<version>${gson.version}</version>
 		</dependency>
 
-		<!-- log start -->
-		<dependency>
+	<!-- log start -->
+	<dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
