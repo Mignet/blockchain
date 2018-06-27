@@ -55,12 +55,12 @@ public class Node {
 		}else{
 			for (String peer : FileUtils.readLines(peerFile,StandardCharsets.UTF_8)) {
 				String[] addr = peer.split(":");
-				if(NetUtils.isLocal(addr[0])&&String.valueOf(port).equals(addr[1])){
+				if(CommonUtils.isLocal(addr[0])&&String.valueOf(port).equals(addr[1])){
 					continue;
 				}
 				peers.add(peer);
 				//raw ipv4
-				peerNetwork.connect(InetAddress.getByName(addr[0]), Integer.parseInt(addr[1]));
+				peerNetwork.connect(addr[0], Integer.parseInt(addr[1]));
 			}
 		}
 
@@ -159,7 +159,7 @@ public class Node {
 							if (!peers.contains(payload)) {
 								String peerAddr = payload.substring(0, payload.indexOf(":"));
 								int peerPort = Integer.parseInt(payload.substring(payload.indexOf(":") + 1));
-								peerNetwork.connect(InetAddress.getByName(peerAddr), peerPort);
+								peerNetwork.connect(peerAddr, peerPort);
 								peers.add(payload);
 								PrintWriter out = new PrintWriter(peerFile);
 								for (int k = 0; k < peers.size(); k++) {
@@ -205,7 +205,7 @@ public class Node {
 					String[] parts = request.split(" ");
 					parts[0] = parts[0].toLowerCase();
 					if ("getinfo".equals(parts[0])) {
-						String res = gson.toJson(blockChain);
+						String res = CommonUtils.toPrettyJson(blockChain);
 						th.res = res;
 					} else if ("send".equals(parts[0])) {
 						try {
@@ -221,7 +221,7 @@ public class Node {
 								th.res = "RPC 500: Invalid vac Error";
 							}
 						} catch (Exception e) {
-							th.res = "Syntax (no '<' or '>'): send <vac> <privateKey>";
+							th.res = "Syntax (no '<' or '>'): send <vac> - Virtual Asset Count(Integer)";
 							LOGGER.error("invalid vac", e);
 						}
 					} else {

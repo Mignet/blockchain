@@ -48,7 +48,7 @@ public class PeerNetwork extends Thread {
      * @param host Peer to connect to
      * @param port Port on peer to connect to
      */
-    public void connect(InetAddress host, int port){
+    public void connect(String host, int port){
     	Socket socket = null;
     	try {
     		socket = new Socket();   
