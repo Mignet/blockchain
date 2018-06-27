@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,10 +30,12 @@ import spark.utils.StringUtils;
 public class Node {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Node.class);
 
-	/** 本地区块链 */
+	/** 本地存储的区块链 */
 	private static List<Block> blockChain = new LinkedList<Block>();
+	private static final String VERSION = "0.1";
 
 	public static void main(String[] args) throws IOException, InterruptedException {
+		final Gson gson = new GsonBuilder().create();
 		int port = 8015;
 		LOGGER.info("Starting peer network...  ");
 		PeerNetwork peerNetwork = new PeerNetwork(port);
@@ -43,33 +46,48 @@ public class Node {
 		RpcServer rpcAgent = new RpcServer(port+1);
 		rpcAgent.start();
 		LOGGER.info("[  RPC agent is Started in port:"+(port+1)+"  ]");
+		
 		ArrayList<String> peers = new ArrayList<>();
 		File peerFile = new File("peers.list");
 		if (!peerFile.exists()) {
 			String host = InetAddress.getLocalHost().toString();
-			FileUtils.writeStringToFile(peerFile, host+":"+port);
+			FileUtils.writeStringToFile(peerFile, host+":"+port,StandardCharsets.UTF_8,true);
+		}else{
+			for (String peer : FileUtils.readLines(peerFile,StandardCharsets.UTF_8)) {
+				String[] addr = peer.split(":");
+				if(NetUtils.isLocal(addr[0])&&String.valueOf(port).equals(addr[1])){
+					continue;
+				}
+				peers.add(peer);
+				//raw ipv4
+				peerNetwork.connect(InetAddress.getByName(addr[0]), Integer.parseInt(addr[1]));
+			}
 		}
-		for (Object peer : FileUtils.readLines(peerFile)) {
-			String[] addr = peer.toString().split(":");
-			peerNetwork.connect(addr[0], Integer.parseInt(addr[1]));
+
+		File dataFile = new File("block.bin");
+		if (!dataFile.exists()) {
+			// hard code genesisBlock
+			Block genesisBlock = new Block();
+			genesisBlock.setIndex(0);
+			genesisBlock.setTimestamp("2017-07-13 22:32:00");//my son's birthday
+			genesisBlock.setVac(0);
+			genesisBlock.setPrevHash("");
+			genesisBlock.setHash(BlockUtils.calculateHash(genesisBlock));
+			blockChain.add(genesisBlock);
+			FileUtils.writeStringToFile(dataFile,gson.toJson(genesisBlock), StandardCharsets.UTF_8,true);
+		}else{
+			List<String> list = FileUtils.readLines(dataFile, StandardCharsets.UTF_8);
+			for(String line:list){
+				blockChain.add(gson.fromJson(line, Block.class));
+			}
 		}
 		TimeUnit.SECONDS.sleep(2);
-
-		peerNetwork.broadcast("VERSION");
-
-		// hard code genesisBlock
-		Block genesisBlock = new Block();
-		genesisBlock.setIndex(0);
-		genesisBlock.setTimestamp("2017-07-13 22:32:00");
-		genesisBlock.setVac(0);
-		genesisBlock.setPrevHash("");
-		genesisBlock.setHash(BlockUtils.calculateHash(genesisBlock));
-		blockChain.add(genesisBlock);
-
-		final Gson gson = new GsonBuilder().create();
 		LOGGER.info(gson.toJson(blockChain));
-		int bestHeight = 0;
+
+		int bestHeight = blockChain.size();
 		boolean catchupMode = true;
+		//建立socket连接后，给大家广播握手
+		peerNetwork.broadcast("VERSION "+ bestHeight+" " + VERSION);
 
 		/**
 		 * p2p 通讯
@@ -79,7 +97,8 @@ public class Node {
 			for (String peer : peerNetwork.peers) {
 				if (!peers.contains(peer)) {
 					peers.add(peer);
-					FileUtils.writeStringToFile(peerFile, peer);
+					LOGGER.info("add peer to file:"+peer);
+					FileUtils.writeStringToFile(peerFile, "\r\n"+peer,StandardCharsets.UTF_8,true);
 				}
 			}
 			peerNetwork.peers.clear();
@@ -91,42 +110,45 @@ public class Node {
 				}
 				List<String> dataList = pt.peerReader.readData();
 				if (dataList == null) {
-					LOGGER.info("Null ret retry.");
+					LOGGER.info("Null return, retry.");
 					System.exit(-5);
 					break;
 				}
 
 				for (String data:dataList) {
-					LOGGER.info("Got data: " + data);
+					LOGGER.info("COMMAND: " + data);
 					int flag = data.indexOf(' ');
 					String cmd = flag >= 0 ? data.substring(0, flag) : data;
 					String payload = flag >= 0 ? data.substring(flag + 1) : "";
 					if (StringUtils.isNotBlank(cmd)) {
 						if ("VERACK".equalsIgnoreCase(cmd)) {
-							// 获取区块高度
+							// 对方确认知道了,并给我区块高度
 							String[] parts = payload.split(" ");
 							bestHeight = Integer.parseInt(parts[0]);
 							//哈希暂时不校验
 						} else if ("VERSION".equalsIgnoreCase(cmd)) {
-							// 对方发来握手信息，我方发给对方区块高度和最新区块的hash
+							// 对方发来握手信息
+							// 获取区块高度和版本号信息
+							String[] parts = payload.split(" ");
+							bestHeight = Integer.parseInt(parts[0]);
+							//我方回复：知道了
 							pt.peerWriter.write("VERACK " + blockChain.size() + " " + blockChain.get(blockChain.size() - 1).getHash());
 						} else if ("BLOCK".equalsIgnoreCase(cmd)) {
 							//把对方给的块存进链中
-							LOGGER.info("Attempting to add block...");
-							LOGGER.info("Block: " + payload);
 							Block newBlock = gson.fromJson(payload, Block.class);
 							if (!blockChain.contains(newBlock)) {
+								LOGGER.info("Attempting to add block...");
+								LOGGER.info("Block: " + payload);
 								// 校验区块，如果成功，将其写入本地区块链
 								if (BlockUtils.isBlockValid(newBlock, blockChain.get(blockChain.size() - 1))) {
-									if (blockChain.add(newBlock) && !catchupMode) {
-										LOGGER.info("Added block " + newBlock.getIndex() + " with hash: ["+ newBlock.getHash() + "]");
-										peerNetwork.broadcast("BLOCK " + payload);
-									}
+									blockChain.add(newBlock);
+									LOGGER.info("Added block " + newBlock.getIndex() + " with hash: ["+ newBlock.getHash() + "]");
+									FileUtils.writeStringToFile(dataFile,"\r\n"+gson.toJson(newBlock), StandardCharsets.UTF_8,true);
+									peerNetwork.broadcast("BLOCK " + payload);
 								}
 							}
 						} else if ("GET_BLOCK".equalsIgnoreCase(cmd)) {
 							//把对方请求的块给对方
-							LOGGER.info("Sending block[" + payload + "] to peer");
 							Block block = blockChain.get(Integer.parseInt(payload));
 							if (block != null) {
 								LOGGER.info("Sending block " + payload + " to peer");
@@ -137,7 +159,7 @@ public class Node {
 							if (!peers.contains(payload)) {
 								String peerAddr = payload.substring(0, payload.indexOf(":"));
 								int peerPort = Integer.parseInt(payload.substring(payload.indexOf(":") + 1));
-								peerNetwork.connect(peerAddr, peerPort);
+								peerNetwork.connect(InetAddress.getByName(peerAddr), peerPort);
 								peers.add(payload);
 								PrintWriter out = new PrintWriter(peerFile);
 								for (int k = 0; k < peers.size(); k++) {
@@ -157,11 +179,8 @@ public class Node {
 			// ********************************
 			// 		比较区块高度,同步区块
 			// ********************************
-
 			int localHeight = blockChain.size();
-
 			if (bestHeight > localHeight) {
-				catchupMode = true;
 				LOGGER.info("Local chain height: " + localHeight);
 				LOGGER.info("Best chain Height: " + bestHeight);
 				TimeUnit.MILLISECONDS.sleep(300);
@@ -177,9 +196,9 @@ public class Node {
 				catchupMode = false;
 			}
 
-			/**
-			 * 处理RPC服务
-			 */
+			// ********************************
+			// 处理RPC服务
+			// ********************************
 			for (RpcThread th:rpcAgent.rpcThreads) {
 				String request = th.req;
 				if (request != null) {
@@ -195,17 +214,18 @@ public class Node {
 							Block newBlock = BlockUtils.generateBlock(blockChain.get(blockChain.size() - 1), vac);
 							if (BlockUtils.isBlockValid(newBlock, blockChain.get(blockChain.size() - 1))) {
 								blockChain.add(newBlock);
-								th.res = "write Success!";
+								th.res = "Block write Success!";
+								FileUtils.writeStringToFile(dataFile,"\r\n"+gson.toJson(newBlock), StandardCharsets.UTF_8,true);
 								peerNetwork.broadcast("BLOCK " + gson.toJson(newBlock));
 							} else {
-								th.res = "RPC 500: Invalid vac Error\n";
+								th.res = "RPC 500: Invalid vac Error";
 							}
 						} catch (Exception e) {
 							th.res = "Syntax (no '<' or '>'): send <vac> <privateKey>";
 							LOGGER.error("invalid vac", e);
 						}
 					} else {
-						th.res = "Unknown command: \"" + parts[0] + "\"";
+						th.res = "Unknown command: \"" + parts[0] + "\" ";
 					}
 				}
 			}
@@ -213,7 +233,7 @@ public class Node {
 			// ****************
 			// 循环结束
 			// ****************
-			TimeUnit.MILLISECONDS.sleep(200);
+			TimeUnit.MILLISECONDS.sleep(100);
 		}
 	}
 

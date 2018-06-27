@@ -40,7 +40,7 @@ public class PeerReader extends Thread {
                 receivedData.add(input);
             }
         } catch (Exception e) {
-        	LOGGER.error("Peer " + socket.getInetAddress() + " disconnected.",e);
+        	LOGGER.info("Peer " + socket.getInetAddress() + " disconnected.");
         }
     }
 

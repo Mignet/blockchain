@@ -36,7 +36,7 @@ public class RpcThread extends Thread {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String input;
-            out.println("================Welcome RPC Daemon==============");
+            out.println("[   Welcome RPC Daemon    ]");
             while((input = in.readLine()) != null){
                 if ("HELP".equalsIgnoreCase(input)){
                 	out.println("############################################## COMMANDS ###############################################");
@@ -54,7 +54,7 @@ public class RpcThread extends Thread {
                 }
             }
         } catch (Exception e){
-            LOGGER.info("An RPC client has disconnected.",e);
+            LOGGER.info("An RPC client has disconnected.");
         }
     }
 }

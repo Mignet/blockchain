@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +40,10 @@ public class PeerWriter extends Thread {
                 }
 				outputBuffer = new ArrayList<>();
 				outputBuffer.add(null);
-				Thread.sleep(100);
+				TimeUnit.MILLISECONDS.sleep(200);
 			}
 		} catch (Exception e) {
-			 LOGGER.error("",e); 
+			 LOGGER.info("Peer " + socket.getInetAddress() + " disconnected."+e.getMessage()); 
 		}
 	}
 
@@ -52,7 +53,7 @@ public class PeerWriter extends Thread {
 	 * @param data Data to write
 	 */
 	public void write(String data) {
-		LOGGER.info("PUTTING INTO WRITE BUFFER: " + data);
+		LOGGER.debug("PUTTING INTO WRITE BUFFER: " + data);
 		File f = new File("writebuffer");
 		try {
 			PrintWriter out = new PrintWriter(f);
