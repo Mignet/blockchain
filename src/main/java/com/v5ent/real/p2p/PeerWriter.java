@@ -53,15 +53,6 @@ public class PeerWriter extends Thread {
 	 * @param data Data to write
 	 */
 	public void write(String data) {
-		LOGGER.debug("PUTTING INTO WRITE BUFFER: " + data);
-		File f = new File("writebuffer");
-		try {
-			PrintWriter out = new PrintWriter(f);
-			out.println("SENDING: " + data);
-			out.close();
-		} catch (Exception e) {
-			LOGGER.error("write error:{}",e); 
-		}
 		if (!outputBuffer.isEmpty()) {
 			if (outputBuffer.get(0) == null) {
 				outputBuffer.remove(0);

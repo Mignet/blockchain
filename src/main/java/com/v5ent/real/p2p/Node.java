@@ -36,6 +36,7 @@ public class Node {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		final Gson gson = new GsonBuilder().create();
+		final Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
 		int port = 8015;
 		LOGGER.info("Starting peer network...  ");
 		PeerNetwork peerNetwork = new PeerNetwork(port);
@@ -82,10 +83,10 @@ public class Node {
 			}
 		}
 		TimeUnit.SECONDS.sleep(2);
-		LOGGER.info(gson.toJson(blockChain));
+		//pretty print
+		LOGGER.info(prettyGson.toJson(blockChain));
 
 		int bestHeight = blockChain.size();
-		boolean catchupMode = true;
 		//建立socket连接后，给大家广播握手
 		peerNetwork.broadcast("VERSION "+ bestHeight+" " + VERSION);
 
@@ -116,7 +117,7 @@ public class Node {
 				}
 
 				for (String data:dataList) {
-					LOGGER.info("COMMAND: " + data);
+					LOGGER.info("[p2p] COMMAND:: " + data);
 					int flag = data.indexOf(' ');
 					String cmd = flag >= 0 ? data.substring(0, flag) : data;
 					String payload = flag >= 0 ? data.substring(flag + 1) : "";
@@ -137,8 +138,7 @@ public class Node {
 							//把对方给的块存进链中
 							Block newBlock = gson.fromJson(payload, Block.class);
 							if (!blockChain.contains(newBlock)) {
-								LOGGER.info("Attempting to add block...");
-								LOGGER.info("Block: " + payload);
+								LOGGER.info("Attempting to add Block: " + payload);
 								// 校验区块，如果成功，将其写入本地区块链
 								if (BlockUtils.isBlockValid(newBlock, blockChain.get(blockChain.size() - 1))) {
 									blockChain.add(newBlock);
@@ -181,19 +181,13 @@ public class Node {
 			// ********************************
 			int localHeight = blockChain.size();
 			if (bestHeight > localHeight) {
-				LOGGER.info("Local chain height: " + localHeight);
-				LOGGER.info("Best chain Height: " + bestHeight);
+				LOGGER.info("Local chain height: " + localHeight+" Best chain Height: " + bestHeight);
 				TimeUnit.MILLISECONDS.sleep(300);
 				
 				for (int i = localHeight; i < bestHeight; i++) {
-					LOGGER.info("请求块 " + i + "...");
+					LOGGER.info("request get block[" + i + "]...");
 					peerNetwork.broadcast("GET_BLOCK " + i);
 				}
-			} else {
-				if (catchupMode) {
-					LOGGER.info("[p2p] - Caught up with network.");
-				}
-				catchupMode = false;
 			}
 
 			// ********************************
@@ -205,7 +199,7 @@ public class Node {
 					String[] parts = request.split(" ");
 					parts[0] = parts[0].toLowerCase();
 					if ("getinfo".equals(parts[0])) {
-						String res = CommonUtils.toPrettyJson(blockChain);
+						String res = prettyGson.toJson(blockChain);
 						th.res = res;
 					} else if ("send".equals(parts[0])) {
 						try {
@@ -222,7 +216,7 @@ public class Node {
 							}
 						} catch (Exception e) {
 							th.res = "Syntax (no '<' or '>'): send <vac> - Virtual Asset Count(Integer)";
-							LOGGER.error("invalid vac", e);
+							LOGGER.error("invalid vac - Virtual Asset Count(Integer)");
 						}
 					} else {
 						th.res = "Unknown command: \"" + parts[0] + "\" ";

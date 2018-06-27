@@ -33,9 +33,4 @@ public class CommonUtils {
 		}
 		return false;
 	}
-
-	// Short hand helper to turn Object into a json string
-	public static String toPrettyJson(Object o) {
-		return new GsonBuilder().setPrettyPrinting().create().toJson(o);
-	}
 }
