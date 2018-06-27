@@ -1,7 +1,6 @@
 package com.v5ent.real.p2p;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -49,10 +48,9 @@ public class PeerNetwork extends Thread {
      * @param port Port on peer to connect to
      */
     public void connect(String host, int port){
-    	Socket socket = null;
-    	try {
-    		socket = new Socket();   
-    		socket.connect(new InetSocketAddress(host,port),3000); 
+    	try (Socket socket = new Socket()){
+    		socket.connect(new InetSocketAddress(host,port),10000); 
+    		socket.setSoTimeout(10000);
 			String remoteHost = socket.getInetAddress().getHostAddress();
 			int remotePort = socket.getPort();
 			LOGGER.info("socket " + remoteHost + ":" + remotePort + " connected.");
@@ -61,7 +59,7 @@ public class PeerNetwork extends Thread {
 			peerThreads.add(pt);
 			pt.start();
 		} catch (IOException e) {
-			LOGGER.info("socket " + host +":"+port+ " can't connect.");
+			LOGGER.warn("socket " + host +":"+port+ " can't connect.");
 		}
     }
 
