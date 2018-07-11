@@ -28,8 +28,8 @@ public class PeerNetwork extends Thread {
      */
     public PeerNetwork() {
         this.port = 8015;
-        this.peerThreads = new ArrayList<>();
-        this.peers = new ArrayList<>();
+        this.peerThreads = new ArrayList<PeerThread>();
+        this.peers = new ArrayList<String>();
     }
     /**
      * 传绑定端口
@@ -37,8 +37,8 @@ public class PeerNetwork extends Thread {
      */
     public PeerNetwork(int port) {
     	this.port = port;
-    	this.peerThreads = new ArrayList<>();
-    	this.peers = new ArrayList<>();
+    	this.peerThreads = new ArrayList<PeerThread>();
+    	this.peers = new ArrayList<String>();
     }
 
     /**
@@ -48,9 +48,11 @@ public class PeerNetwork extends Thread {
      * @param port Port on peer to connect to
      */
     public void connect(String host, int port){
-    	try (Socket socket = new Socket()){
+    	Socket socket =null;
+    	try {
+    		socket = new Socket();
     		socket.connect(new InetSocketAddress(host,port),10000); 
-    		socket.setSoTimeout(10000);
+//    		socket.setSoTimeout(10000);
 			String remoteHost = socket.getInetAddress().getHostAddress();
 			int remotePort = socket.getPort();
 			LOGGER.info("socket " + remoteHost + ":" + remotePort + " connected.");
@@ -59,7 +61,7 @@ public class PeerNetwork extends Thread {
 			peerThreads.add(pt);
 			pt.start();
 		} catch (IOException e) {
-			LOGGER.warn("socket " + host +":"+port+ " can't connect.");
+			LOGGER.warn("socket " + host +":"+port+ " can't connect.",e);
 		}
     }
 

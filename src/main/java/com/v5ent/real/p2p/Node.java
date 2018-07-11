@@ -48,7 +48,7 @@ public class Node {
 		rpcAgent.start();
 		LOGGER.info("[  RPC agent is Started in port:"+(port+1)+"  ]");
 		
-		ArrayList<String> peers = new ArrayList<>();
+		ArrayList<String> peers = new ArrayList<String>();
 		File peerFile = new File("peers.list");
 		if (!peerFile.exists()) {
 			String host = InetAddress.getLocalHost().toString();
@@ -157,8 +157,8 @@ public class Node {
 						} else if ("ADDR".equalsIgnoreCase(cmd)) {
 							// 对方发来地址，建立连接并保存
 							if (!peers.contains(payload)) {
-								String peerAddr = payload.substring(0, payload.indexOf(":"));
-								int peerPort = Integer.parseInt(payload.substring(payload.indexOf(":") + 1));
+								String peerAddr = payload.substring(0, payload.indexOf(':'));
+								int peerPort = Integer.parseInt(payload.substring(payload.indexOf(':') + 1));
 								peerNetwork.connect(peerAddr, peerPort);
 								peers.add(payload);
 								PrintWriter out = new PrintWriter(peerFile);

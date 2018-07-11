@@ -20,9 +20,13 @@ import com.google.gson.GsonBuilder;
 import com.v5ent.entity.Block;
 import com.v5ent.entity.Message;
 
+import spark.Request;
+import spark.Response;
+import spark.Route;
+
 public class SparkWeb {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SparkWeb.class);
-	private static List<Block> blockChain = new LinkedList<>();
+	private static List<Block> blockChain = new LinkedList<Block>();
 
 	/**
 	 * 计算区块的hash值
@@ -104,27 +108,35 @@ public class SparkWeb {
 		/**
 		 * get /
 		 */
-		get("/", (request, response) -> gson.toJson(blockChain)); 
+		get("/", new Route() {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+				return gson.toJson(blockChain);
+			}
+		}); 
 
 		/***
 		 * post / {"vac":75}
 		 */
-		post("/", (request, response) ->{
-				String body = request.body();
-				Message m = gson.fromJson(body, Message.class);
-				if (m == null) {
-					return "vac is NULL";
-				}
-				int vac = m.getVac();
-				Block lastBlock = blockChain.get(blockChain.size() - 1);
-				Block newBlock = generateBlock(lastBlock, vac);
-				if (isBlockValid(newBlock, lastBlock)) {
-					blockChain.add(newBlock);
-					LOGGER.debug(gson.toJson(blockChain));
-				} else {
-					return "HTTP 500: Invalid Block Error";
-				}
-				return "success!";
+		post("/", new Route() {
+			@Override
+			public Object handle(Request request, Response response) throws Exception {
+					String body = request.body();
+					Message m = gson.fromJson(body, Message.class);
+					if (m == null) {
+						return "vac is NULL";
+					}
+					int vac = m.getVac();
+					Block lastBlock = blockChain.get(blockChain.size() - 1);
+					Block newBlock = generateBlock(lastBlock, vac);
+					if (isBlockValid(newBlock, lastBlock)) {
+						blockChain.add(newBlock);
+						LOGGER.debug(gson.toJson(blockChain));
+					} else {
+						return "HTTP 500: Invalid Block Error";
+					}
+					return "success!";
+			}
 		});
 		
 		LOGGER.info(gson.toJson(blockChain));

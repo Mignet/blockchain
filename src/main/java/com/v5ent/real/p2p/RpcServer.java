@@ -27,7 +27,7 @@ public class RpcServer extends Thread
     public RpcServer()
     {
         this.port = 8016;
-        this.rpcThreads = new ArrayList<>();
+        this.rpcThreads = new ArrayList<RpcThread>();
     }
 
     /**
@@ -37,7 +37,7 @@ public class RpcServer extends Thread
     public RpcServer(int port)
     {
         this.port = port;
-        this.rpcThreads = new ArrayList<>();
+        this.rpcThreads = new ArrayList<RpcThread>();
     }
 
     @Override

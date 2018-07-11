@@ -27,7 +27,7 @@ public class PeerWriter extends Thread {
 	@Override
 	public void run() {
 		try {
-			outputBuffer = new ArrayList<>();
+			outputBuffer = new ArrayList<String>();
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 			while (runFlag) {
 				if (!outputBuffer.isEmpty() && outputBuffer.get(0) != null) {
@@ -35,15 +35,15 @@ public class PeerWriter extends Thread {
                     	LOGGER.info("Sending " +line + " to " + socket.getInetAddress());
                         out.println(line);
                     }
-                    outputBuffer = new ArrayList<>();
+                    outputBuffer = new ArrayList<String>();
                     outputBuffer.add(null);
                 }
-				outputBuffer = new ArrayList<>();
+				outputBuffer = new ArrayList<String>();
 				outputBuffer.add(null);
 				TimeUnit.MILLISECONDS.sleep(200);
 			}
 		} catch (Exception e) {
-			 LOGGER.info("Peer " + socket.getInetAddress() + " disconnected."+e.getMessage()); 
+			 LOGGER.info("Peer " + socket.getInetAddress() + " disconnected."+e); 
 		}
 	}
 

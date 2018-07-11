@@ -14,6 +14,13 @@
 			<id>maven-central</id>
 			<url>http://mvnrepository.com/maven2/</url>
 		</repository>
+		<repository>
+			<id>4thline-repo</id>
+			<url>http://4thline.org/m2</url>
+			<snapshots>
+				<enabled>false</enabled> <!-- Or true, if you like to use unreleased code -->
+			</snapshots>
+		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -22,47 +29,71 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<properties>
-		<commons.codec.version>1.9</commons.codec.version>
+		<commons.io.version>2.6</commons.io.version>
+		<commons.codec.version>1.10</commons.codec.version>
 		<spark.version>2.6.0</spark.version>
 		<slf4j.version>1.7.12</slf4j.version>
-        <log4j.version>2.4.1</log4j.version>
+		<log4j.version>2.4.1</log4j.version>
 		<gson.version>2.8.2</gson.version>
 		<netty-all.version>4.0.33.Final</netty-all.version>
 		<guava.version>18.0</guava.version>
-		<java.version>1.8</java.version>
+		<java.version>1.6</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
 	</properties>
 
 	<dependencies>
-	
+		<!-- UPnp -->
 		<dependency>
-		    <groupId>com.google.guava</groupId>
-		    <artifactId>guava</artifactId>
-		    <version>${guava.version}</version>
+		    <groupId>org.fourthline.cling</groupId>
+		    <artifactId>cling-core</artifactId>
+		    <version>2.1.1</version>
 		</dependency>
-        
+		<dependency>
+		       <groupId>org.fourthline.cling</groupId>
+		       <artifactId>cling-core</artifactId>
+		       <version>2.1.1</version>
+		   </dependency>
+		<!-- netty for p2p -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>${netty-all.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>${commons.codec.version}</version>
 		</dependency>
-		
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-io -->
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-io</artifactId>
-		    <version>1.3.2</version>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons.io.version}</version>
 		</dependency>
-		
+
 		<!-- 超小型web框架 -->
 		<dependency>
 			<groupId>com.sparkjava</groupId>
 			<artifactId>spark-core</artifactId>
 			<version>${spark.version}</version>
 		</dependency>
-		
+
+		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.59</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -70,30 +101,30 @@
 			<version>${gson.version}</version>
 		</dependency>
 
-	<!-- log start -->
-	<dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
+		<!-- log start -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
 		<!-- log end -->
 
 	</dependencies>
@@ -127,6 +158,16 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
+								</filter>
+							</filters>
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">

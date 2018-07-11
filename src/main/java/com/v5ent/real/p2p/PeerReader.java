@@ -21,7 +21,7 @@ public class PeerReader extends Thread {
     private Socket socket;
 
     /**缓冲区*/
-    private ArrayList<String> receivedData = new ArrayList<>();
+    private ArrayList<String> receivedData = new ArrayList<String>();
 
     /**
      * 传入套接字
@@ -40,7 +40,7 @@ public class PeerReader extends Thread {
                 receivedData.add(input);
             }
         } catch (Exception e) {
-        	LOGGER.info("Peer " + socket.getInetAddress() + " disconnected.");
+        	LOGGER.info("Peer " + socket.getInetAddress() + " disconnected.",e);
         }
     }
 
@@ -49,7 +49,7 @@ public class PeerReader extends Thread {
      * @return List<String> Data pulled from receivedData
      */
     public List<String> readData() {
-        ArrayList<String> inputBuffer = new ArrayList<>(receivedData);
+        ArrayList<String> inputBuffer = new ArrayList<String>(receivedData);
         receivedData.clear(); //clear 'buffer'
         return inputBuffer;
     }
